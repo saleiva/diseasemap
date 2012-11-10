@@ -3,7 +3,7 @@ var CartoDB = Backbone.CartoDB({ user: 'saleiva-beta' });
 
 var EarthQuake = CartoDB.CartoDBModel.extend({
 
-  ANIMATION_TIME: 1200000*70,
+  ANIMATION_TIME: 1200000*50,
 
   getPos: function() {
     var coords = this.get('position').coordinates;
