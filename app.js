@@ -74,7 +74,8 @@ var EarthQuakes = CartoDB.CartoDBCollection.extend({
       'timestamp': 'd',
       'position': 'the_geom',
       'magnitude': 'rating',
-      'id': 'cartodb_id'
+      'id': 'cartodb_id',
+      'color': 'color'
   },
   order: 'd'
 
@@ -126,17 +127,19 @@ Overlay.prototype = {
                   var p = eq.getPos(self.time);
                   p = map.coordinatePoint(map.locationCoordinate(p));
                   return "translate(" + p.x + "," + p.y +")";
-          });
+            })
     node.append("circle")
-      .attr('style', "fill: #F00; fill-opacity: 0.3");
-
+      .attr('style', function(val){
+              return 'fill: ' + val.data.color + '; fill-opacity: 0.8';
+            })
     this.svg.selectAll('g').selectAll('circle')
       .attr("r", function(b) {
         return b.data.scaleAt(self.time);
       })
       .attr('style', function(b) {
+        debugger
         var o = b.data.opacity(self.time);
-        return "fill: #F00; fill-opacity: " + o;
+        return 'fill: ' + b.data.get('color') + '; fill-opacity:' + o;
       });
   }
 }
@@ -148,7 +151,7 @@ function initMap() {
 
     // create map
     var src = document.getElementById('src');
-    template = 'http://b.tiles.mapbox.com/v3/mapbox.mapbox-light/{Z}/{X}/{Y}.png64';
+    template = 'http://a.tiles.mapbox.com/v3/saleiva.map-ns7rd8n0/{Z}/{X}/{Y}.png64';
     var subdomains = [ '', 'a.', 'b.', 'c.' ];
     var provider = new MM.TemplatedLayer(template, subdomains);
 
