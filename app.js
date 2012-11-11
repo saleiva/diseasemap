@@ -3,7 +3,7 @@ var CartoDB = Backbone.CartoDB({ user: 'saleiva-beta' });
 
 var EarthQuake = CartoDB.CartoDBModel.extend({
 
-  ANIMATION_TIME: 1200000*50,
+  ANIMATION_TIME: 1200000*200,
 
   getPos: function() {
     var coords = this.get('position').coordinates;
@@ -20,7 +20,7 @@ var EarthQuake = CartoDB.CartoDBModel.extend({
       var interpol_time = this.ANIMATION_TIME;
       if(dt > 0 && dt < interpol_time) {
           var tt = this.scale*dt/interpol_time;
-          var r = 1 + 20* Math.sqrt(tt);
+          var r = 1 + 10 * Math.sqrt(tt);
           return r;
       }
       return 0;
@@ -144,37 +144,63 @@ Overlay.prototype = {
   }
 }
 
+var interval, f, map;
 
 function initMap() {
-    var map;
-
-
     // create map
     var src = document.getElementById('src');
-    template = 'http://a.tiles.mapbox.com/v3/saleiva.map-ns7rd8n0/{Z}/{X}/{Y}.png64';
+    template = 'http://a.tiles.mapbox.com/v3/saleiva.map-bdlsybbb/{Z}/{X}/{Y}.png64';
     var subdomains = [ '', 'a.', 'b.', 'c.' ];
     var provider = new MM.TemplatedLayer(template, subdomains);
 
-    map = new MM.Map(document.getElementById('map'), provider);
+    var template = 'http://saleiva-beta.cartodb.com/tiles/countries_borders/{Z}/{X}/{Y}.png';
+    var provider2 = new MM.TemplatedLayer(template, subdomains);
+
+    map = new MM.Map(document.getElementById('map'), [provider, provider2]);
 
     var earthquakes = new EarthQuakes();
     var setup_layer = function() {
-      var f = new Overlay(map, earthquakes);
       init_graph(earthquakes);
-      setInterval(function() {
-        f.time += 36000*40;
-        f.draw(map);
-        document.getElementById('date').innerHTML = new Date(f.time).toString().replace(/GMT.*/g,'');
-      },10);
+      f = new Overlay(map, earthquakes);
+      interval = window.setInterval(animate, 30);
     };
 
     // fetch all data
     earthquakes.bind('reset', setup_layer);
     earthquakes.fetch();
     if(!location.hash) {
-        map.setCenterZoom(new MM.Location(40.67, -73.98), 2);
+        map.setCenterZoom(new MM.Location(18.0, -3.4), 2);
     }
     var hash = new MM.Hash(map);
 
+    var e = document.getElementById('bigButton');
+    console.log(e);
+    e.style.display = 'none';
+}
 
+function animate(){
+  f.time += 3600*1000*6;
+  f.draw(map);
+  document.getElementById('date').innerHTML = new Date(f.time).toString().replace(/GMT.*/g,'');
+}
+
+function pauseOrPlay(){
+  if(interval){
+    window.clearInterval(interval);   
+    interval = false;
+    document.getElementById('bigButton').className = 'play';
+  }else{
+    interval = window.setInterval(animate, 30);
+    document.getElementById('bigButton').className = 'pause';
+  }
+}
+
+var timeout;
+document.onmousemove = function(){
+  console.log();
+  clearTimeout(timeout);
+  $('#bigButton').fadeIn();
+  timeout = setTimeout(function(){
+    $('#bigButton').fadeOut('slow');
+  }, 600);
 }
