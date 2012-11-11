@@ -1,5 +1,5 @@
 
-function init_graph(data) {
+function init_graph(data, f) {
   $.get('https://saleiva-beta.cartodb.com/api/v1/sql?q=select%20*%20from%20diseases_groups_legend', function(dataColor)  {
     var colors = dataColor.rows.map(function(d) {
       return {
@@ -8,13 +8,14 @@ function init_graph(data) {
         group_id: d.identifier
       }
     });
-    graph(data, colors);
+    f(graph(data, colors));
   });
 }
 
  
 
 function graph(data, dataColor) {
+  RABODATA = data;
 
   var colors_ = {};
   dataColor.forEach(function(d) {
@@ -101,6 +102,14 @@ function graph(data, dataColor) {
      .delay(function(d, i) { return i * 10; })
      .attr("y", y1)
      .attr("height", function(d) { return y0(d) - y1(d); });
+
+ var lineTime = vis.append("rect")
+     .attr("width", 2)
+     .attr("x", 0)
+     .attr("y", 0)
+     .attr("height",200)
+     .attr('fill', '#FFF')
+     
  
  /*var labels = vis.selectAll("text.label")
      .data(data[0])
@@ -175,10 +184,15 @@ function graph(data, dataColor) {
  }
 
  return function(t) {
-   var a = data.first().time.getTime();
-   var b = data.last().time.getTime();
-   var idx = ((t - a)/(b - a)*data.size())>>0;
-
+   /*var a = RABODATA.first().time.getTime();
+   var b = RABODATA.last().time.getTime();
+    a+= new Date().getTimezoneOffset()*60*1000 + (16*60*60*1000);
+    b+= new Date().getTimezoneOffset()*60*1000 + (16*60*60*1000);
+  */
+   var t = width*frame/(90*4)
+   //var t = ((t*1000 - a)/(b - a))*width;
+   lineTime.attr('x', t);
  }
+
 }
 

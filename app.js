@@ -1,4 +1,5 @@
 
+var RABOS;
 var CartoDB = Backbone.CartoDB({ user: 'saleiva-beta' });
 
 var EarthQuake = CartoDB.CartoDBModel.extend({
@@ -160,7 +161,9 @@ function initMap() {
 
     var earthquakes = new EarthQuakes();
     var setup_layer = function() {
-      init_graph(earthquakes);
+      init_graph(earthquakes, function(t) {
+        RABOS= t;
+      });
       f = new Overlay(map, earthquakes);
       interval = window.setInterval(animate, 30);
     };
@@ -178,10 +181,13 @@ function initMap() {
     e.style.display = 'none';
 }
 
+var frame = 0;
 function animate(){
   f.time += 3600*1000*6;
   f.draw(map);
+  ++frame;
   document.getElementById('date').innerHTML = new Date(f.time).toString().replace(/GMT.*/g,'');
+  RABOS && RABOS(frame);
 }
 
 function pauseOrPlay(){
