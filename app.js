@@ -75,7 +75,8 @@ var EarthQuakes = CartoDB.CartoDBCollection.extend({
       'position': 'the_geom',
       'magnitude': 'rating',
       'id': 'cartodb_id',
-      'color': 'color'
+      'color': 'color',
+      'group_id': 'group_id'
   },
   order: 'd'
 
@@ -87,7 +88,7 @@ var EarthQuakes = CartoDB.CartoDBCollection.extend({
  */
 function Overlay(map, earthquakes) {
 
-    this.earthquakes = earthquakes;
+    window.ea = this.earthquakes = earthquakes;
     this.time = earthquakes.first().time.getTime() + new Date().getTimezoneOffset()*60*1000 + (16*60*60*1000);
     
 
@@ -137,7 +138,6 @@ Overlay.prototype = {
         return b.data.scaleAt(self.time);
       })
       .attr('style', function(b) {
-        debugger
         var o = b.data.opacity(self.time);
         return 'fill: ' + b.data.get('color') + '; fill-opacity:' + o;
       });
@@ -160,6 +160,7 @@ function initMap() {
     var earthquakes = new EarthQuakes();
     var setup_layer = function() {
       var f = new Overlay(map, earthquakes);
+      init_graph(earthquakes);
       setInterval(function() {
         f.time += 36000*40;
         f.draw(map);
